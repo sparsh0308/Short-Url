@@ -1,27 +1,34 @@
 package com.shortUrl.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import redis.clients.jedis.Jedis;
 
 @Service
 public class RedisService {
 
+    private final Jedis jedis;
+
     @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
-
-    // Save a value
-    public void save(String key, String value) {
-        redisTemplate.opsForValue().set(key, value);
+    public RedisService(Jedis jedis) {
+        this.jedis = jedis;
     }
 
-    // Retrieve a value
     public String get(String key) {
-        return (String) redisTemplate.opsForValue().get(key);
+        return jedis.get(key);
     }
 
-    // Delete a key
+    public void save(String key, String value) {
+        jedis.set(key, value);
+    }
+
     public void delete(String key) {
-        redisTemplate.delete(key);
+        jedis.del(key);
+    }
+
+    public void close() {
+        if (jedis != null) {
+            jedis.close();
+        }
     }
 }
