@@ -2,22 +2,22 @@ package com.shortUrl.controller;
 
 import com.shortUrl.service.ShortUrlService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "/short-url")
 public class ShortUrlController {
 
     @Autowired
     private ShortUrlService shortUrlService;
 
-    @PostMapping(value = "/generate")
+    @PostMapping(value = "/generate-short-url")
     public String generateShortUrl(@RequestParam String url) {
         return shortUrlService.generateShortUrl(url);
     }
 
-    @GetMapping(value = "/get-original-url")
-    public String getOriginalUrl(@RequestParam String shortUrl) {
+    @GetMapping(value = "/{shortUrl}")
+    public ResponseEntity<Void> getOriginalUrl(@PathVariable String shortUrl) {
         return shortUrlService.getOriginalUrl(shortUrl);
     }
 }

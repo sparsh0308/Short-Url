@@ -3,9 +3,9 @@ package com.shortUrl.service;
 import com.shortUrl.config.RedisService;
 import com.shortUrl.util.RandomStringGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import java.util.NoSuchElementException;
 
 @Service
 public class ShortUrlServiceImpl implements ShortUrlService{
@@ -23,15 +23,17 @@ public class ShortUrlServiceImpl implements ShortUrlService{
             urlChars = randomStringGenerator.generateRandomString();
         }
         redisService.save(urlChars, url);
-        return "Saved";
+        return "localhost:8080/"+urlChars;
     }
 
     @Override
-    public String getOriginalUrl(String shortUrl) {
+    public ResponseEntity<Void> getOriginalUrl(String shortUrl) {
         String originalUrl = redisService.get(shortUrl);
         if (originalUrl == null) {
-            return "Original URL not found for the provided short URL.";
+            return ResponseEntity.notFound().build();
         }
-        return originalUrl;
+        return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
+                .header("Location", originalUrl)
+                .build();
     }
 }
