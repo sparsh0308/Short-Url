@@ -11,12 +11,12 @@ public class ShortUrlController {
     @Autowired
     private ShortUrlService shortUrlService;
 
-    @PostMapping(value = "/generate/")
+    @PostMapping(value = "/generate")
     public String generateShortUrl(@RequestParam String url) {
         return shortUrlService.generateShortUrl(url);
     }
 
-    @GetMapping(value = "/get-original-url/")
+    @GetMapping(value = "/get-original-url")
     public String getOriginalUrl(@RequestParam String shortUrl) {
         return shortUrlService.getOriginalUrl(shortUrl);
     }

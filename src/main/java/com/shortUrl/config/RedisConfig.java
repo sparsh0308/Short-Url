@@ -1,29 +1,36 @@
 package com.shortUrl.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 
 @Configuration
 public class RedisConfig {
 
+    @Value("${spring.redis.host}")
+    private String redisHost;
+
+    @Value("${spring.redis.port}")
+    private int redisPort;
+
     @Bean
-    public JedisConnectionFactory jedisConnectionFactory() {
-        return new JedisConnectionFactory();
+    public JedisPool jedisPool() {
+        return new JedisPool(redisHost, redisPort); // Return JedisPool instance
     }
 
     @Bean
-    public RedisTemplate<String, Object> redisTemplate(JedisConnectionFactory jedisConnectionFactory) {
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(jedisConnectionFactory);
-
-        // Use String serializers for keys and values
-        template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new StringRedisSerializer());
-
-        return template;
+    public Jedis jedis(JedisPool jedisPool) {
+        try (Jedis jedis = jedisPool.getResource()) {  // Use Jedis instance within try-with-resources
+            // Check if Redis is reachable
+            if ("PONG".equals(jedis.ping())) {
+                System.out.println("Connected to Redis successfully.");
+            }
+            return jedis; // Return the Jedis instance
+        } catch (JedisConnectionException e) {
+            throw new RuntimeException("Could not connect to Redis, Redis might be down.", e);
+        }
     }
 }
-
